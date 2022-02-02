@@ -52,6 +52,7 @@
 								:style="{ width: canvasSvgWidth, height: canvasSvgHeight }"
 							></svg>
 							<svg class="overlays" v-html="overlaysSvg" :style="{ width: canvasSvgWidth, height: canvasSvgHeight }"></svg>
+							<canvas class="rendering-canvas" ref="rendering" :style="{ width: canvasSvgWidth, height: canvasSvgHeight }"></canvas>
 						</div>
 					</LayoutCol>
 					<LayoutCol class="bar-area">
@@ -173,7 +174,8 @@
 				position: relative;
 				overflow: hidden;
 
-				svg {
+				svg,
+				canvas {
 					position: absolute;
 					// Fallback values if JS hasn't set these to integers yet
 					width: 100%;
@@ -254,8 +256,7 @@ export default defineComponent({
 		viewportResize() {
 			// Resize the canvas
 
-			const canvas = this.$refs.canvas as HTMLElement;
-
+			const canvas = this.$refs.canvas as HTMLCanvasElement;
 			// Get the width and height rounded up to the nearest even number because resizing is centered and dividing an odd number by 2 for centering causes antialiasing
 			let width = Math.ceil(parseFloat(getComputedStyle(canvas).width));
 			if (width % 2 === 1) width += 1;
@@ -264,12 +265,23 @@ export default defineComponent({
 
 			this.canvasSvgWidth = `${width}px`;
 			this.canvasSvgHeight = `${height}px`;
-
 			// Resize the rulers
 			const rulerHorizontal = this.$refs.rulerHorizontal as typeof CanvasRuler;
 			const rulerVertical = this.$refs.rulerVertical as typeof CanvasRuler;
 			rulerHorizontal?.resize();
 			rulerVertical?.resize();
+
+			const htmlCanvas = this.$refs.rendering as HTMLCanvasElement;
+
+			// Set display size (css pixels).
+			htmlCanvas.style.width = `${width}px`;
+			htmlCanvas.style.height = `${height}px`;
+
+			// Set actual size in memory (scaled to account for extra pixel density).
+			// From https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#correcting_resolution_in_a_canvas
+			const scale = window.devicePixelRatio || 1;
+			htmlCanvas.width = Math.floor(width * scale);
+			htmlCanvas.height = Math.floor(height * scale);
 		},
 		pasteFile(e: DragEvent) {
 			const { dataTransfer } = e;
@@ -319,6 +331,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
+		this.viewportResize();
 		this.editor.subscriptions.subscribeJsMessage(UpdateDocumentArtwork, (UpdateDocumentArtwork) => {
 			this.artworkSvg = UpdateDocumentArtwork.svg;
 

@@ -19,6 +19,7 @@ kurbo = { git = "https://github.com/linebender/kurbo.git", features = [
 serde = { version = "1.0", features = ["derive"] }
 base64 = "0.13"
 glam = { version = "0.17", features = ["serde"] }
+lyon = "1.0"
 
 # Font rendering
 rustybuzz = "*"

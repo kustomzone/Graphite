@@ -1,4 +1,5 @@
-pub mod editor_api;
+pub mod canvas;
+mod editor_api;
 pub mod helpers;
 
 use helpers::{panic_hook, WasmLog};

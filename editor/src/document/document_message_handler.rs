@@ -54,7 +54,7 @@ pub struct DocumentMessageHandler {
 
 	movement_handler: MovementMessageHandler,
 	#[serde(skip)]
-	overlays_message_handler: OverlaysMessageHandler,
+	pub overlays_message_handler: OverlaysMessageHandler,
 	pub artboard_message_handler: ArtboardMessageHandler,
 	#[serde(skip)]
 	transform_layer_handler: TransformLayerMessageHandler,

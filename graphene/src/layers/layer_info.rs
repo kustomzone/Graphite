@@ -11,7 +11,8 @@ use crate::DocumentError;
 use crate::LayerId;
 
 use core::fmt;
-use glam::{DAffine2, DMat2, DVec2};
+use glam::{DAffine2, DMat2, DVec2, Vec2};
+use kurbo::{BezPath, PathEl};
 use serde::{Deserialize, Serialize};
 use std::fmt::Write;
 
@@ -259,6 +260,64 @@ impl Layer {
 	/// ```
 	pub fn iter(&self) -> LayerIter<'_> {
 		LayerIter { stack: vec![self] }
+	}
+
+	pub fn transform_iter(&self) -> TransformIter<'_> {
+		TransformIter {
+			stack: vec![(self, glam::DAffine2::from_scale(DVec2::splat(1.)), 0)],
+		}
+	}
+
+	pub fn curve_iter(&self) -> impl Iterator<Item = (VectorShape, PathStyle, u32)> + '_ {
+		fn glam_to_kurbo(transform: DAffine2) -> kurbo::Affine {
+			kurbo::Affine::new(transform.to_cols_array())
+		}
+		self.transform_iter().filter_map(|(layer, transform, depth)| match &layer.data {
+			LayerDataType::Folder(_) => None,
+			LayerDataType::Shape(shape) => {
+				let mut path = shape.shape.clone();
+				path.apply_affine(transform);
+				Some((path, shape.style.clone(), depth))
+			}
+			LayerDataType::Text(_) => None,  // TODO: Implement
+			LayerDataType::Image(_) => None, // TODO: Implement
+		})
+	}
+
+	pub fn line_iter(&self) -> impl Iterator<Item = (lyon::path::Path, PathStyle, u32)> + '_ {
+		//log::debug!("line_iter");
+		self.curve_iter().map(|(path, style, depth)| {
+			//path.flatten(0.5, |segment| vec.push(segment));
+			//log::trace!("flat {vec:?}");
+			let path: BezPath = (&path).into();
+			use lyon::math::point;
+			use lyon::path::Path;
+			let to_point = |p: kurbo::Point| point(p.x as f32, p.y as f32);
+
+			let mut builder = Path::builder().with_svg();
+			for operation in path {
+				match operation {
+					PathEl::MoveTo(point) => {
+						builder.move_to(to_point(point));
+					}
+					PathEl::LineTo(point) => {
+						builder.line_to(to_point(point));
+					}
+					PathEl::ClosePath => {
+						builder.close();
+					}
+					PathEl::QuadTo(handle, point) => {
+						builder.quadratic_bezier_to(to_point(handle), to_point(point));
+					}
+					PathEl::CurveTo(handle1, handle2, point) => {
+						builder.cubic_bezier_to(to_point(handle1), to_point(handle2), to_point(point));
+					}
+				}
+			}
+			let paths = builder.build();
+			//log::debug!("flat {paths:?}");
+			(paths, style, depth)
+		})
 	}
 
 	pub fn render(&mut self, transforms: &mut Vec<DAffine2>, svg_defs: &mut String, render_data: RenderData) -> &str {
@@ -523,6 +582,32 @@ impl<'a> Iterator for LayerIter<'a> {
 					self.stack.extend(layers);
 				};
 				Some(layer)
+			}
+			None => None,
+		}
+	}
+}
+
+#[derive(Debug, Default)]
+pub struct TransformIter<'a> {
+	pub stack: Vec<(&'a Layer, glam::DAffine2, u32)>,
+}
+
+impl<'a> Iterator for TransformIter<'a> {
+	type Item = (&'a Layer, glam::DAffine2, u32);
+
+	fn next(&mut self) -> Option<Self::Item> {
+		match self.stack.pop() {
+			Some((layer, transform, depth)) => {
+				let new_transform = transform * layer.transform;
+				//log::debug!("new_transform: {new_transform:?}");
+				if let LayerDataType::Folder(folder) = &layer.data {
+					let layers = folder.layers();
+					self.stack.extend(layers.iter().map(|x| (x, new_transform, depth + 1)));
+					self.next()
+				} else {
+					Some((layer, new_transform, depth))
+				}
 			}
 			None => None,
 		}
