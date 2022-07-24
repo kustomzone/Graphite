@@ -4,13 +4,11 @@ precision highp float;
 precision highp int;
 
 uniform mat3x2 matrix;
-layout(location = 0) in vec2 line_segment_start;
-layout(location = 1) in vec2 line_segment_end;
+layout(location = 0) in vec2 pos;
 layout(location = 2) in vec4 line_color;
 layout(location = 3) in float line_zindex;
 layout(location = 4) in float line_width;
 layout(location = 5) in uint line_flags;
-layout(location = 6) in mat3x2 instance_offset;
 
 
 smooth out vec2 vertex_position;
