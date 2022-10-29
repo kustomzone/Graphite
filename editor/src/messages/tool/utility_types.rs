@@ -139,6 +139,7 @@ pub trait ToolMetadata {
 }
 
 pub struct ToolData {
+	pub modal_tool_type: Option<ModalToolType>,
 	pub active_tool_type: ToolType,
 	pub tools: HashMap<ToolType, Box<Tool>>,
 }
@@ -226,6 +227,7 @@ impl Default for ToolFsmState {
 	fn default() -> Self {
 		ToolFsmState {
 			tool_data: ToolData {
+				modal_tool_type: None,
 				active_tool_type: ToolType::Select,
 				tools: list_tools_in_groups()
 					.into_iter()
@@ -248,6 +250,12 @@ impl ToolFsmState {
 	pub fn new() -> Self {
 		Self::default()
 	}
+}
+
+#[repr(usize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ModalToolType {
+	EyedropperSampling,
 }
 
 #[repr(usize)]

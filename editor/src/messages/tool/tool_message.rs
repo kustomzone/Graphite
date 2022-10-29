@@ -1,4 +1,4 @@
-use super::utility_types::ToolType;
+use super::utility_types::{ModalToolType, ToolType};
 use crate::messages::prelude::*;
 
 use graphene::color::Color;
@@ -115,6 +115,12 @@ pub enum ToolMessage {
 	#[remain::unsorted]
 	ActivateToolImaginate,
 
+	#[remain::unsorted]
+	ActivateModalToolEyedropperSampling,
+
+	ActivateModalTool {
+		modal_tool_type: ModalToolType,
+	},
 	ActivateTool {
 		tool_type: ToolType,
 	},

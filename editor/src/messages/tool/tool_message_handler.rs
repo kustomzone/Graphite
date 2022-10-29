@@ -1,4 +1,4 @@
-use super::utility_types::{tool_message_to_tool_type, ToolFsmState};
+use super::utility_types::{tool_message_to_tool_type, ModalToolType, ToolFsmState};
 use crate::application::generate_uuid;
 use crate::messages::layout::utility_types::layout_widget::PropertyHolder;
 use crate::messages::layout::utility_types::misc::LayoutTarget;
@@ -59,6 +59,39 @@ impl MessageHandler<ToolMessage, (&DocumentMessageHandler, u64, &InputPreprocess
 			#[remain::unsorted]
 			ToolMessage::ActivateToolImaginate => responses.push_front(ToolMessage::ActivateTool { tool_type: ToolType::Imaginate }.into()),
 
+			#[remain::unsorted]
+			ToolMessage::ActivateModalToolEyedropperSampling => responses.push_front(
+				ToolMessage::ActivateModalTool {
+					modal_tool_type: ModalToolType::EyedropperSampling,
+				}
+				.into(),
+			),
+
+			ToolMessage::ActivateModalTool { modal_tool_type } => {
+				let tool_data = &mut self.tool_state.tool_data;
+				let document_data = &self.tool_state.document_tool_data;
+
+				// Store the new active tool
+				tool_data.modal_tool_type = Some(modal_tool_type);
+
+				// // Unsubscribe old tool from the broadcaster
+				// tool_data.tools.get(&tool_type).unwrap().deactivate(responses);
+
+				// // Subscribe new tool
+				// tool_data.tools.get(&tool_type).unwrap().activate(responses);
+
+				// // Send the SelectionChanged message to the active tool, this will ensure the selection is updated
+				// responses.push_back(BroadcastEvent::SelectionChanged.into());
+
+				// // Send the DocumentIsDirty message to the active tool's sub-tool message handler
+				// responses.push_back(BroadcastEvent::DocumentIsDirty.into());
+
+				// // Send Properties to the frontend
+				// tool_data.tools.get(&tool_type).unwrap().register_properties(responses, LayoutTarget::ToolOptions);
+
+				// // Notify the frontend about the new active tool to be displayed
+				// tool_data.register_properties(responses, LayoutTarget::ToolShelf);
+			}
 			ToolMessage::ActivateTool { tool_type } => {
 				let tool_data = &mut self.tool_state.tool_data;
 				let document_data = &self.tool_state.document_tool_data;
@@ -179,13 +212,29 @@ impl MessageHandler<ToolMessage, (&DocumentMessageHandler, u64, &InputPreprocess
 
 			// Sub-messages
 			#[remain::unsorted]
+			modal_tool_message if self.tool_state.tool_data.modal_tool_type.is_some() => match self.tool_state.tool_data.modal_tool_type.unwrap() {
+				ModalToolType::EyedropperSampling => {
+					let document_data = &self.tool_state.document_tool_data;
+					responses.push_back(
+						FrontendMessage::UpdateEyedropperSamplingState {
+							mouse_position: Some(input.mouse.position.into()),
+							primary_color: "#".to_string() + document_data.primary_color.rgb_hex().as_str(),
+							secondary_color: "#".to_string() + document_data.secondary_color.rgb_hex().as_str(),
+							set_color_choice: None,
+						}
+						.into(),
+					);
+				}
+			},
+			#[remain::unsorted]
 			tool_message => {
 				let tool_type = match &tool_message {
 					ToolMessage::UpdateCursor | ToolMessage::UpdateHints => self.tool_state.tool_data.active_tool_type,
 					tool_message => tool_message_to_tool_type(tool_message),
 				};
-				let document_data = &self.tool_state.document_tool_data;
+
 				let tool_data = &mut self.tool_state.tool_data;
+				let document_data = &self.tool_state.document_tool_data;
 
 				if let Some(tool) = tool_data.tools.get_mut(&tool_type) {
 					if tool_type == tool_data.active_tool_type {
