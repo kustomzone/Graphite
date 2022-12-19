@@ -1,0 +1,16 @@
+#technical {
+	background-color: var(--color-mustard);
+}
+
+#creative {
+	background-color: var(--color-ale);
+}
+
+#monetary {
+	background-color: var(--color-flamingo);
+	color: rgba(0, 0, 0, 0.9);
+
+	.graphic {
+		max-width: 400px;
+	}
+}

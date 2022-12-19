@@ -1,149 +1,160 @@
 +++
 title = "Contribute to Graphite"
-template = "page.html"
+
+[extra]
+css = ["/contribute.css"]
+js = ["/fundraising.js"]
 +++
 
 <section class="section-row">
 <div class="section">
 
-# Contribute to Graphite.
+# Contribute to Graphite
 
-It's great to hear you are interested in contributing to Graphite! We want to make it as easy and frictionless as possible for you to get started. Here are the basics.
+Graphite is built by volunteers. Support the effort to bring great, free creative software to the world.
 
-## Building and running the codebase.
+</div>
+</section>
 
-Graphite is built with Rust and web technologies. Install the latest LTS version of [Node.js](https://nodejs.org/) and stable release of [Rust](https://www.rust-lang.org/), as well as [Git](https://git-scm.com/).
+<section id="technical" class="feature-box">
+<div class="box">
 
-Clone the project:
-```
-git clone https://github.com/GraphiteEditor/Graphite.git
-```
+<h1 class="box-header">Technical</h1>
 
-Then install the required Node.js packages:
-```
-cd frontend
-npm install
-```
+---
 
-You only need to explicitly install Node.js dependencies. Rust's cargo dependencies will be installed automatically on your first build. One dependency in the build chain, `wasm-pack`, will be installed automatically on your system when the Node.js packages are installing. (If you prefer to install this manually, get it from the [wasm-pack website](https://rustwasm.github.io/wasm-pack/), then install your npm dependencies with `npm install --no-optional` instead.)
+<div class="triptych">
 
-One tool in the Rust ecosystem does need to be installed:
+<div class="section">
 
-```
-cargo install cargo-watch
-```
+## Code contributors
 
-That's it! Now, to run the project while developing, just execute:
-```
-npm start
-```
+Read the [Developer Docs](/contribute/docs) to begin contributing code.
 
-This spins up the dev server at <http://localhost:8080> with a file watcher that performs hot reloading of the web page. You should be able to start the server, edit and save web and Rust code, and rarely have to kill the server (by hitting <kbd>Ctrl</kbd><kbd>C</kbd> twice). You sometimes may need to reload the web page if the hot reloading didn't behave perfectly. This method compiles Graphite code in debug mode which includes debug symbols for viewing function names in stack traces.
+- Application programming
+- Developing new nodes
+- Graphics programming
+- Writing integration tests
+- Porting libraries to Rust
+- Svelte/TypeScript coding
+- Backend web services
 
-To compile a production build with full optimizations:
-```
-cargo install cargo-about
-npm run build
-```
+<a href="/contribute/docs" class="link arrow">Developer Docs</a>
 
-It produces the `/frontend/dist` directory containing the static site files that must be served by your own web server.
+</div>
 
-While developing Rust code, `cargo check` and `cargo clippy` may be run from the root directory. You can also use `npm run lint` or `npm run lint-no-fix` to solve web code formatting and `cargo fmt` for Rust code formatting. If you don't use VS Code and its format-on-save feature, please remember to format before committing or consider [setting up a `pre-commit` hook](https://githooks.com/) to do that automatically.
+<div class="section">
 
-We provide default configurations for VS Code users. When you open the project, watch for a prompt to install the project's suggested extensions. They will provide helpful web and Rust tooling. If you use a different IDE, you won't get default configurations for the project out of the box, so please remember to format your code and check CI for errors.
+## Code reviewers
 
-## Task board.
+Help land pull requests by reading over code changes and providing feedback about code quality.
 
-Visit our [**Task Board**](https://github.com/orgs/GraphiteEditor/projects/1/views/1) and look through the current sprint's column. You are also welcome to work on tasks prioritized for upcoming sprints. Find any issues with the green "Available" tag.
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-Pay attention to the tags which provide some useful information like which ones are a [**Good First Issue**](https://github.com/GraphiteEditor/Graphite/issues?q=is%3Aissue+is%3Aopen+label%3AAvailable+label%3A%22Good+First+Issue%22+) and whether they involve [**only Rust**](https://github.com/GraphiteEditor/Graphite/issues?q=is%3Aissue+is%3Aopen+label%3ARust+label%3AAvailable+-label%3AWeb+), [**only Web**](https://github.com/GraphiteEditor/Graphite/issues?q=is%3Aissue+is%3Aopen+label%3AWeb+label%3AAvailable+-label%3ARust+) (HTML/CSS/TypeScript/Svelte), or [**both**](https://github.com/GraphiteEditor/Graphite/issues?q=is%3Aissue+is%3Aopen+label%3AAvailable+label%3ARust+label%3AWeb+). Feel free to pick whatever task interests you, then comment on the issue that you would like to start. After commenting, you can dig in right away, then we will assign the issue to your GitHub user to keep the status of things organized.
+</div>
 
-## Mentorship.
+<div class="section">
 
-Join the [project's Discord server](https://discord.graphite.rs) then hop on the `#development` channel and ping @Keavon and @TrueDoctor. We would be delighted to help you get started with in-depth explanations of the code, one-on-one mentorship and pair programming. This is very valuable and not at all an inconvenience to us because it helps you avoid the intimidating step of getting started, so please do not hesitate to reach out right away.
+## Consultants
 
-## Docs.
+If you have some subject-matter expertise in the following areas, you can help advise on technical matters:
 
-Look for `README.md` files within select folders of the codebase and read the code comments at the top of some Rust files. As many folders are missing docs, this currently isn't a substitute for mentorship described in the section above. If you also want to dig into the code and solidify your understanding by writing documentation, that would be equally valuable to the project!
+- Advanced-level Rust knowledge
+- Compiler/programming language design
+- Fullstack/cloud/databases
+- Web build systems
+- Designing backwards-compatible file formats
+- CRDTs
+- Machine learning
+- Color science
 
-## Codebase overview.
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-The Graphite Editor is built as a web app powered by Svelte in the frontend and Rust in the backend which is compiled to WebAssembly (wasm) and run in the browser.
+</div>
 
-The Editor's frontend web code lives in `/frontend/src` and the backend Rust code lives in `/editor`. The web-based frontend is intended to be semi-temporary and eventually replaceable with a pure-Rust GUI frontend. Therefore, all backend code should be unaware of JavaScript or web concepts and all Editor application logic should be written in Rust not JS.
+</div>
 
-### Frontend/backend communication.
+</div>
+</section>
 
-Frontend (JS) -> backend (Rust/wasm) communication is achieved through a thin Rust translation layer in `/frontend/wasm/src/editor_api.rs` which wraps the Editor backend's complex Rust data type API and provides the JS with a simpler API of callable functions. These wrapper functions are compiled by wasm-bindgen into autogenerated JS functions that serve as an entry point into the wasm.
+<section id="creative" class="feature-box">
+<div class="box">
 
-Backend (Rust) -> frontend (JS) communication happens by sending a queue of messages to the frontend message dispatcher. After the JS calls any wrapper API function to get into backend (Rust) code execution, the Editor's business logic runs and queues up `FrontendMessage`s (defined in `/editor/src/messages/frontend/frontend_message.rs`) which get mapped from Rust to JS-friendly data types in `/frontend/src/wasm-communication/messages.ts`. Various JS code subscribes to these messages by calling `subscribeJsMessage(MessageName, (messageData) => { /* callback code */ });`.
+<h1 class="box-header">Creative</h1>
 
-### The Editor backend and Legacy Document modules.
+---
 
-The Graphite Editor backend handles all the day-to-day logic and responsibilities of a user-facing interactive application. Some duties include: user input, GUI state management, viewport tool behavior, layer management and selection, and handling of multiple document tabs.
+<div class="triptych">
 
-The actual document (the artwork data and layers included in a saved `.graphite` file) is part of another core module located in `/document-legacy`. The (soon-to-be-replaced) Legacy Document codebase manages a user's document. Once it is replaced, the new Document module (that will be located in `/document`) will store a document's node graph and change history. While it's OK for the Editor to read data from—or make immutable function calls upon—the user's document controlled by the Legacy Document module, it should never be directly mutated. Instead, messages (called Operations) should be sent to the document to request changes occur. The Legacy Document code is designed to be used by the Editor or by third-party Rust or C/C++ code directly so a careful separation of concerns between the Editor and Legacy Document modules should be considered.
+<div class="section">
 
-### The message bus.
+## Writers
 
-Every part of the Graphite stack works based on the concept of message passing. Messages are pushed to the front or back of a queue and each one is processed by the module's dispatcher in the order encountered. Only the dispatcher owns a mutable reference to update its module's state.
+Documentation and blog posts
 
-<details><summary><b>Additional technical details (click to show)</b></summary>
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-A message is an enum variant of a certain message sub-type like `FrontendMessage`, `ToolMessage`, `PortfolioMessage`, or `DocumentMessage`. An example is `DocumentMessage::DeleteSelectedLayers` (which carries no data) or `DocumentMessage::RenameLayer(Vec<LayerId>, String)` (which carries a layer path and a string as data).
+</div>
 
-Message sub-types hierarchically wrap other message sub-types; for example, `DocumentMessage` is wrapped by `PortfolioMessage` via `PortfolioMessage::Document(DocumentMessage)` (this carries the child message as data), and `EllipseMessage` is wrapped by `ToolMessage` via `ToolMessage::Ellipse(EllipseMessage)` (again, this carries the child message as data). Every message sub-type is wrapped by the top-level `Message`, so the previous example is actually `Message::Tool(ToolMessage::Ellipse(EllipseMessage))`.
+<div class="section">
 
-Because this is cumbersome, we have a proc macro `#[child]` that automatically implements the `From` trait on message sub-types and lets you write `DocumentMessage::DeleteSelectedLayers.into()` instead of `Message(PortfolioMessage::Document(DocumentMessage::DeleteSelectedLayers))`.
+## Artists
 
-</details>
+Create sample artwork and stress test the software.
 
-## Debugging.
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-Use the browser console (<kbd>F12</kbd>) to check for warnings and errors. Use the Rust macro `debug!("A debug message")` to print to the browser console. These statements should be for temporary debugging. Remove them before committing to master. Print-based debugging is necessary because breakpoints are not supported in WebAssembly.
+</div>
 
-Additional print statements are available that *should* be committed.
+<div class="section">
 
-- `error!()` is for descriptive user-facing error messages
-- `warn!()` is for non-critical problems that may indicate a bug somewhere
-- `trace!()` is for verbose logs of ordinary internal activity, hidden by default
+## QA testers
 
-To show trace logs, activate *Help* > *Debug: Print Trace Logs*.
+Search for bugs and breakages resulting from adding new features.
 
-To also view logs of the messages dispatched by the message bus system, activate *Help* > *Debug: Print Messages* > *Only Names*. Or use *Full Contents* for more verbose insight with the actual data being passed.
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-## Contributing guide.
+</div>
 
-### Code style.
+</div>
 
-The Graphite project highly values code quality and accessibility to new contributors. Therefore, please make an effort to make your code readable and well-documented.
+</div>
+</section>
 
-- **Naming:**  
-  Please use descriptive variable/function/symbol names and keep abbreviations to a minimum. Prefer to spell out full words most of the time, so `gen_doc_fmt` should be written out as `generate_document_format` instead. This avoids the mental burden of expanding abbreviations into semantic meaning. Monitors are wide enough to display long variable/function names, so descriptive is better than cryptic. To streamline code review, it's recommended that you set up a spellcheck plugin in your editor. This project uses American English spelling conventions.
+<section id="monetary" class="feature-box">
+<div class="box">
 
-- **Linting:**  
-  Please ensure Clippy is enabled. This should be set up automatically in VS Code. Try to avoid committing code with lint warnings.
+<h1 class="box-header">Monetary</h1>
 
-- **Imports:**  
-  At the top of Rust files, please follow the convention of separating imports into three blocks, in this order:
-  1. Local (`use super::` and `use crate::`)
-  2. First-party crates (e.g. `use editor::`)
-  3. Third-party libraries (e.g. `use std::` or `use serde::`)
+---
 
-  Combine related imports with common paths at the same depth. For example, the lines `use crate::A::B::C;`, `use crate::A::B::C::Foo;`, and `use crate::A::B::C::Bar;` should be combined into `use crate::A::B::C::{self, Foo, Bar};`. But do not combine imports at mixed path depths. For example, `use crate::A::{B::C::Foo, X::Hello};` should be split into two separate import lines. In simpler terms, avoid putting a `::` inside `{}`.
+<div class="section-row">
 
-- **Tests:**  
-  It's great if you can write tests for your code, especially if it's a tricky stand-alone function. However at the moment, we are prioritizing rapid iteration and will usually accept code without associated unit tests. That stance will change in the near future as we begin focusing more on stability than iteration speed.
+<div class="section">
 
-Additional best practices will be added here soon. Please ask @Keavon in the mean time.
+## Spring 2023 fundraising goal
 
-### Draft pull requests.
+<div class="fundraising loading" data-fundraising>
+	<div class="fundraising-bar" data-fundraising-bar style="--fundraising-percent: 0%">
+		<div class="fundraising-bar-progress"></div>
+	</div>
+	<div class="goal-metrics">
+		<span data-fundraising-percent>Progress: <span data-dynamic>0</span>%</span>
+		<span data-fundraising-goal>Goal: $<span data-dynamic>0</span>/month</span>
+	</div>
+</div>
 
-Once you begin writing code, please open a pull request immediately and mark it as a **Draft**. Please push to this on a frequent basis, even if things don't compile or work fully yet. It's very helpful to have your work-in-progress code up on GitHub so the status of your feature is less of a mystery.
+[Become a monthly supporter](https://github.com/sponsors/Keavon) this spring to collect the exclusive 💚 badge. Each season you support, a new heart design is yours to keep. In the future, they'll be shown on Graphite account profiles and community areas like forums and in-app collaboration.
 
-Open a new PR as a draft / Convert an existing PR to a draft:
+<a href="https://github.com/sponsors/Keavon" class="link arrow">Donate</a>
 
-![Screenhots showing GitHub's "Create pull request (arrow) > Create draft pull request" and "Still in progress? Convert to draft" buttons](https://static.graphite.rs/content/contribute/draft-pr.png)
+</div>
+
+<div class="graphic">
+	<a href="https://github.com/sponsors/Keavon"><img src="https://files.keavon.com/-/OtherDroopyBoto/Spring_Heart.png" /></a>
+</div>
+
+</div>
 
 </div>
 </section>
