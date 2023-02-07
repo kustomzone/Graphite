@@ -109,7 +109,7 @@ fn gaussian_node(input: f32, sigma: f64) -> f32 {
 pub struct DistanceNode;
 
 #[node_macro::node_fn(DistanceNode)]
-fn distance_node(input: (i32, i32)) -> f32 {
+fn distance_node(#[no_result] input: (i32, i32)) -> f32 {
 	let (x, y) = input;
 	((x * x + y * y) as f32).sqrt()
 }

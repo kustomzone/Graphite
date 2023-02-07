@@ -10,6 +10,7 @@ extern crate log;
 pub mod generic;
 pub mod ops;
 pub mod structural;
+#[cfg(feature = "std")]
 pub mod uuid;
 pub mod value;
 
@@ -18,7 +19,7 @@ pub mod gpu;
 
 pub mod raster;
 
-#[cfg(feature = "alloc")]
+#[cfg(feature = "std")]
 pub mod vector;
 
 // pub trait Node: for<'n> NodeIO<'n> {

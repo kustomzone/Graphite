@@ -1,3 +1,5 @@
+use alloc::string::String;
+use alloc::vec;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Serialize, Deserialize, specta::Type)]
@@ -8,8 +10,8 @@ pub struct Uuid(
 );
 
 mod u64_string {
+	use core::str::FromStr;
 	use serde::{self, Deserialize, Deserializer, Serializer};
-	use std::str::FromStr;
 
 	// The signature of a serialize_with function must follow the pattern:
 	//

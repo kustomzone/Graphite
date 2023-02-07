@@ -147,7 +147,33 @@ pub fn node_fn(attr: TokenStream, item: TokenStream) -> TokenStream {
 				}
 			}
 		}
-
 	}
 	.into()
+}
+
+fn generate_where_bounds(parameter_inputs: &[&syn::PatType], node_generics: Punctuated<GenericParam, Comma>, wrap_in_result: bool) -> Vec<WherePredicate> {
+	let extra_where_clause = parameter_inputs
+		.iter()
+		.zip(&node_generics)
+		.map(|(ty, name)| {
+			let ty = &ty.ty;
+			let GenericParam::Type(generic_ty) = name else { panic!("Expected type generic."); };
+			let ident = &generic_ty.ident;
+			WherePredicate::Type(PredicateType {
+				lifetimes: None,
+				bounded_ty: Type::Verbatim(ident.to_token_stream()),
+				colon_token: Default::default(),
+				bounds: Punctuated::from_iter([TypeParamBound::Trait(TraitBound {
+					paren_token: None,
+					modifier: syn::TraitBoundModifier::None,
+					lifetimes: syn::parse_quote!(for<'any_input>),
+					path: match wrap_in_result {
+						false => syn::parse_quote!(Node<'any_input, (), Output = #ty>),
+						true => syn::parse_quote!(Node<'any_input, (), Output = Result<#ty, alloc::string::String>>),
+					},
+				})]),
+			})
+		})
+		.collect::<Vec<_>>();
+	extra_where_clause
 }

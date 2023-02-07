@@ -19,8 +19,9 @@ use bytemuck::{Pod, Zeroable};
 /// the values encode the brightness of each channel proportional to the light intensity in cd/m² (nits) in HDR, and `0.0` (black) to `1.0` (white) in SDR color.
 #[repr(C)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "std", derive(specta::Type))]
 #[cfg_attr(feature = "gpu", derive(Pod, Zeroable))]
-#[derive(Debug, Clone, Copy, PartialEq, Default, DynAny, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Default, DynAny)]
 pub struct Color {
 	red: f32,
 	green: f32,
