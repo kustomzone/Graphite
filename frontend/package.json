@@ -6,7 +6,7 @@
 	"browserslist": "> 1.5%, last 2 versions, not dead, not ie 11, not op_mini all, not ios_saf < 13",
 	"type": "module",
 	"scripts": {
-		"dev": "npm run build-wasm && concurrently -k \"parcel serve index.html --port 8080\" \"npm run watch:wasm\" || (npm run print-building-help && exit 1)",
+		"start": "npm run build-wasm && concurrently -k \"parcel serve index.html --port 8080\" \"npm run watch:wasm\" || (npm run print-building-help && exit 1)",
 		"build": "npm run build-wasm-prod && parcel build index.html || (npm run print-building-help && exit 1)",
 		"tauri:dev": "echo 'Make sure you build the wasm binary for tauri using `npm run tauri:build-wasm`' && parcel serve index.html --port 8080",
 		"build-wasm": "wasm-pack build ./wasm --dev --target=web",
@@ -21,6 +21,7 @@
 		"@tauri-apps/api": "^1.2.0",
 		"class-transformer": "^0.5.1",
 		"idb-keyval": "^6.2.0",
+		"postcss": "^8.4.21",
 		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
