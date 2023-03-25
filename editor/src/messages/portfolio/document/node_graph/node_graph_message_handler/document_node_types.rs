@@ -440,6 +440,23 @@ fn static_nodes() -> Vec<DocumentNodeType> {
 			properties: node_properties::blur_image_properties,
 		},
 		DocumentNodeType {
+			name: "Brush",
+			category: "Brush",
+			identifier: NodeImplementation::proto("graphene_std::brush::BrushNode"),
+			inputs: vec![
+				DocumentInputType::value("None", TaggedValue::None, false),
+				DocumentInputType::value("Image", TaggedValue::VecDVec2((0..2).map(|x| DVec2::new(x as f64 * 10., 0.)).collect()), true),
+				DocumentInputType::value("Radius", TaggedValue::F64(1.), false),
+				DocumentInputType::value("Hardness", TaggedValue::F64(1.), false),
+				DocumentInputType::value("Opacity", TaggedValue::F64(1.), false),
+			],
+			outputs: vec![DocumentOutputType {
+				name: "Image",
+				data_type: FrontendGraphDataType::Raster,
+			}],
+			properties: node_properties::brush_node_properties,
+		},
+		DocumentNodeType {
 			name: "Cache",
 			category: "Structural",
 			identifier: NodeImplementation::DocumentNode(NodeNetwork {
@@ -469,6 +486,14 @@ fn static_nodes() -> Vec<DocumentNodeType> {
 				.collect(),
 				..Default::default()
 			}),
+			inputs: vec![DocumentInputType::value("Image", TaggedValue::ImageFrame(ImageFrame::empty()), true)],
+			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
+			properties: node_properties::no_properties,
+		},
+		DocumentNodeType {
+			name: "Ref",
+			category: "Structural",
+			identifier: NodeImplementation::proto("graphene_std::memo::CacheNode"),
 			inputs: vec![DocumentInputType::value("Image", TaggedValue::ImageFrame(ImageFrame::empty()), true)],
 			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
 			properties: node_properties::no_properties,
