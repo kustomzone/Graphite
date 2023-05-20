@@ -71,3 +71,15 @@ fn set_vector_data_stroke(
 	});
 	vector_data
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct SetResampleCurveNode<Density> {
+	density: Density,
+}
+
+#[node_macro::node_fn(SetResampleCurveNode)]
+fn set_vector_data_resample_curve(vector_data: VectorData, density: u32) -> VectorData {
+	warn!("Density: {:?}", density);
+	// TODO: Implement sampling.
+	vector_data
+}
