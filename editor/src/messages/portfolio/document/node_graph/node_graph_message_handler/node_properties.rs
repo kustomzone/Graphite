@@ -1591,7 +1591,7 @@ pub fn stroke_properties(document_node: &DocumentNode, node_id: NodeId, _context
 pub fn resample_curve_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
 	let density_index = 1;
 
-	let density = number_widget(document_node, node_id, density_index, "Density", NumberInput::default().unit(" points").min(2.), true);
+	let density = number_widget(document_node, node_id, density_index, "Density", NumberInput::default().min(0.01), true);
 
 	vec![LayoutGroup::Row { widgets: density }]
 }
