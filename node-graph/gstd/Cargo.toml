@@ -22,6 +22,7 @@ quantization = ["autoquant"]
 
 
 [dependencies]
+noise = "0.8.2"
 rand = { version = "0.8.5", features = ["alloc", "small_rng"], default-features = false}
 rand_chacha = { version = "0.3.1", default-features = false }
 autoquant = { git = "https://github.com/truedoctor/autoquant", optional = true, features = [
