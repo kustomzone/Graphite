@@ -15,7 +15,7 @@ use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
 use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
-use noise::{Fbm, Perlin, Simplex};
+use noise::{Fbm, Perlin, Simplex, Worley};
 
 #[derive(Debug, DynAny)]
 pub enum Error {
@@ -462,6 +462,32 @@ pub struct SimplexNoiseNode<Width, Height> {
 fn simplex_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let fbm = Fbm::<Simplex>::new(seed);
+
+	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
+
+	for y in 0..height {
+		for x in 0..width {
+			let pixel = image.get_pixel_mut(x, y).unwrap();
+			let luminance: f64 = luma_map.get_value(x as usize, y as usize) / 2. + 0.5;
+			*pixel = Color::from_luminance(luminance as f32);
+		}
+	}
+	ImageFrame::<Color> {
+		image,
+		transform: DAffine2::from_scale(DVec2::new(width as f64, height as f64)),
+	}
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct VoronoiNoiseNode<Width, Height> {
+	width: Width,
+	height: Height,
+}
+
+#[node_macro::node_fn(VoronoiNoiseNode)]
+fn voronoi_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
+	let mut image = Image::new(width, height, Color::BLACK);
+	let fbm = Fbm::<Worley>::new(seed);
 
 	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
 

@@ -702,7 +702,7 @@ pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _co
 	let noise_type = noise_type(document_node, node_id, 0, "Noise Type", true);
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
-	let seed = number_widget(document_node, node_id, 3, "Seed", NumberInput::default().unit("px").min(1.), true);
+	let seed = number_widget(document_node, node_id, 3, "Seed", NumberInput::default().min(0.), true);
 
 	vec![
 		noise_type,
@@ -713,7 +713,7 @@ pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _co
 }
 
 pub fn noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
-	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().unit("px").min(1.), true);
+	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
 
