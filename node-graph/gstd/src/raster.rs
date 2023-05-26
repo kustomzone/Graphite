@@ -14,8 +14,8 @@ use std::path::Path;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
-use noise::{Fbm, Perlin};
 use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
+use noise::{Fbm, Perlin, Simplex};
 
 #[derive(Debug, DynAny)]
 pub enum Error {
@@ -435,18 +435,40 @@ pub struct PerlinNoiseNode<Width, Height> {
 #[node_macro::node_fn(PerlinNoiseNode)]
 fn perlin_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
-    let fbm = Fbm::<Perlin>::new(seed);
+	let fbm = Fbm::<Perlin>::new(seed);
 
-    let lumaMap = PlaneMapBuilder::<_, 2>::new(&fbm)
-        .set_size(width as usize, height as usize)
-        .set_x_bounds(-5.0, 5.0)
-        .set_y_bounds(-5.0, 5.0)
-        .build();
+	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
 
 	for y in 0..height {
 		for x in 0..width {
 			let pixel = image.get_pixel_mut(x, y).unwrap();
-            let luminance:f64 = lumaMap.get_value(x as usize, y as usize) / 2. + 0.5;
+			let luminance: f64 = luma_map.get_value(x as usize, y as usize) / 2. + 0.5;
+			*pixel = Color::from_luminance(luminance as f32);
+		}
+	}
+	ImageFrame::<Color> {
+		image,
+		transform: DAffine2::from_scale(DVec2::new(width as f64, height as f64)),
+	}
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SimplexNoiseNode<Width, Height> {
+	width: Width,
+	height: Height,
+}
+
+#[node_macro::node_fn(SimplexNoiseNode)]
+fn simplex_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
+	let mut image = Image::new(width, height, Color::BLACK);
+	let fbm = Fbm::<Simplex>::new(seed);
+
+	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
+
+	for y in 0..height {
+		for x in 0..width {
+			let pixel = image.get_pixel_mut(x, y).unwrap();
+			let luminance: f64 = luma_map.get_value(x as usize, y as usize) / 2. + 0.5;
 			*pixel = Color::from_luminance(luminance as f32);
 		}
 	}

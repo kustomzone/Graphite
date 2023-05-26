@@ -457,7 +457,19 @@ fn static_nodes() -> Vec<DocumentNodeType> {
 				DocumentInputType::value("Height", TaggedValue::U32(1), false),
 			],
 			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
-			properties: node_properties::perlin_noise_properties,
+			properties: node_properties::noise_properties,
+		},
+		DocumentNodeType {
+			name: "Simplex Noise",
+			category: "General",
+			identifier: NodeImplementation::proto("graphene_std::raster::SimplexNoiseNode<_, _>"),
+			inputs: vec![
+				DocumentInputType::value("Seed", TaggedValue::U32(2), false),
+				DocumentInputType::value("Width", TaggedValue::U32(1), false),
+				DocumentInputType::value("Height", TaggedValue::U32(1), false),
+			],
+			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
+			properties: node_properties::noise_properties,
 		},
 		DocumentNodeType {
 			name: "Mask",

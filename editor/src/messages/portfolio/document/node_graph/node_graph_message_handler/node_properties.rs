@@ -712,16 +712,12 @@ pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _co
 	]
 }
 
-pub fn perlin_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
+pub fn noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
 	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().unit("px").min(1.), true);
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
 
-	vec![
-		LayoutGroup::Row { widgets: width },
-		LayoutGroup::Row { widgets: height },
-		LayoutGroup::Row { widgets: seed },
-	]
+	vec![LayoutGroup::Row { widgets: width }, LayoutGroup::Row { widgets: height }, LayoutGroup::Row { widgets: seed }]
 }
 
 pub fn adjust_hsl_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
