@@ -6,7 +6,7 @@ use crate::messages::prelude::*;
 use graph_craft::concrete;
 use graph_craft::document::value::TaggedValue;
 use graph_craft::document::{DocumentNode, NodeId, NodeInput};
-use graphene_core::raster::{BlendMode, Color, ImageFrame, LuminanceCalculation, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
+use graphene_core::raster::{BlendMode, Color, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
 use graphene_core::text::Font;
 use graphene_core::vector::style::{FillType, GradientType, LineCap, LineJoin};
 use graphene_core::{Cow, Type, TypeDescriptor};
@@ -299,6 +299,29 @@ fn color_channel(document_node: &DocumentNode, node_id: u64, index: usize, name:
 		widgets.extend_from_slice(&[WidgetHolder::unrelated_separator(), DropdownInput::new(entries).selected_index(Some(mode as u32)).widget_holder()]);
 	}
 	LayoutGroup::Row { widgets }.with_tooltip("Color Channel")
+}
+
+//TODO Use generalized Version of this as soon as it's available
+fn noise_type(document_node: &DocumentNode, node_id: u64, index: usize, name: &str, blank_assist: bool) -> LayoutGroup {
+	let mut widgets = start_widgets(document_node, node_id, index, name, FrontendGraphDataType::General, blank_assist);
+	if let &NodeInput::Value {
+		tagged_value: TaggedValue::NoiseType(calculation),
+		exposed: false,
+	} = &document_node.inputs[index]
+	{
+		let calculation_modes = NoiseType::list();
+		let mut entries = Vec::with_capacity(calculation_modes.len());
+		for method in calculation_modes {
+			entries.push(DropdownEntryData::new(method.to_string()).on_update(update_value(move |_| TaggedValue::NoiseType(method), node_id, index)));
+		}
+		let entries = vec![entries];
+
+		widgets.extend_from_slice(&[
+			WidgetHolder::unrelated_separator(),
+			DropdownInput::new(entries).selected_index(Some(calculation as u32)).widget_holder(),
+		]);
+	}
+	LayoutGroup::Row { widgets }.with_tooltip("Type of Noise")
 }
 
 //TODO Use generalized Version of this as soon as it's available
@@ -673,6 +696,20 @@ pub fn extract_channel_properties(document_node: &DocumentNode, node_id: NodeId,
 	let color_channel = color_channel(document_node, node_id, 1, "From", true);
 
 	vec![color_channel]
+}
+
+pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
+	let noise_type = noise_type(document_node, node_id, 0, "Noise Type", true);
+	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
+	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
+	let seed = number_widget(document_node, node_id, 3, "Seed", NumberInput::default().unit("px").min(1.), true);
+
+	vec![
+		noise_type,
+		LayoutGroup::Row { widgets: width },
+		LayoutGroup::Row { widgets: height },
+		LayoutGroup::Row { widgets: seed },
+	]
 }
 
 pub fn adjust_hsl_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {

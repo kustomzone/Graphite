@@ -422,6 +422,7 @@ fn node_registry() -> HashMap<NodeIdentifier, HashMap<NodeIOTypes, NodeConstruct
 		async_node!(graphene_core::memo::MemoNode<_, _>, input: (), output: Arc<WasmSurfaceHandle>, params: [Arc<WasmSurfaceHandle>]),
 		register_node!(graphene_core::structural::ConsNode<_, _>, input: Image<Color>, params: [&str]),
 		register_node!(graphene_std::raster::ImageFrameNode<_, _>, input: Image<Color>, params: [DAffine2]),
+		register_node!(graphene_std::raster::PixelNoiseNode<_, _, _>, input: NoiseType, params: [u32, u32, u32]),
 		#[cfg(feature = "quantization")]
 		register_node!(graphene_std::quantization::GenerateQuantizationNode<_, _>, input: ImageFrame<Color>, params: [u32, u32]),
 		raster_node!(graphene_core::quantization::QuantizeNode<_>, params: [QuantizationChannels]),

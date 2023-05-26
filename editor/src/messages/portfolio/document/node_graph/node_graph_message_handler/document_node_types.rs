@@ -8,7 +8,7 @@ use graph_craft::document::value::*;
 use graph_craft::document::*;
 use graph_craft::imaginate_input::ImaginateSamplingMethod;
 use graph_craft::NodeIdentifier;
-use graphene_core::raster::{BlendMode, Color, Image, ImageFrame, LuminanceCalculation, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
+use graphene_core::raster::{BlendMode, Color, Image, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
 use graphene_core::text::Font;
 use graphene_core::vector::VectorData;
 use graphene_core::*;
@@ -433,6 +433,19 @@ fn static_nodes() -> Vec<DocumentNodeType> {
 			],
 			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
 			properties: |_document_node, _node_id, _context| node_properties::string_properties("Creates an embedded image with the given transform"),
+		},
+		DocumentNodeType {
+			name: "Pixel Noise",
+			category: "General",
+			identifier: NodeImplementation::proto("graphene_std::raster::PixelNoiseNode<_, _, _>"),
+			inputs: vec![
+				DocumentInputType::value("Noise Type", TaggedValue::NoiseType(NoiseType::WhiteNoise), false),
+				DocumentInputType::value("Width", TaggedValue::U32(1), false),
+				DocumentInputType::value("Height", TaggedValue::U32(1), false),
+				DocumentInputType::value("Seed", TaggedValue::U32(2), false),
+			],
+			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
+			properties: node_properties::pixel_noise_properties,
 		},
 		DocumentNodeType {
 			name: "Mask",

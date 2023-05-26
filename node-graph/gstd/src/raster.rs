@@ -1,6 +1,6 @@
 use dyn_any::{DynAny, StaticType};
 use glam::{DAffine2, DVec2};
-use graphene_core::raster::{Alpha, BlendMode, BlendNode, Image, ImageFrame, Linear, LinearChannel, Luminance, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample};
+use graphene_core::raster::{Alpha, BlendMode, BlendNode, Image, ImageFrame, Linear, LinearChannel, Luminance, NoiseType, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample};
 use graphene_core::transform::Transform;
 
 use graphene_core::raster::bbox::{AxisAlignedBbox, Bbox};
@@ -10,6 +10,9 @@ use graphene_core::{Color, Node};
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::path::Path;
+
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
 #[derive(Debug, DynAny)]
 pub enum Error {
@@ -393,6 +396,33 @@ pub struct ImageFrameNode<P, Transform> {
 fn image_frame<_P: Pixel>(image: Image<_P>, transform: DAffine2) -> graphene_core::raster::ImageFrame<_P> {
 	graphene_core::raster::ImageFrame { image, transform }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct PixelNoiseNode<Width, Height, Seed> {
+	width: Width,
+	height: Height,
+	seed: Seed,
+}
+
+#[node_macro::node_fn(PixelNoiseNode)]
+fn pixel_noise(_noise_type: NoiseType, width: u32, height: u32, seed: u32) -> graphene_core::raster::ImageFrame<Color> {
+	let mut rng = ChaCha8Rng::seed_from_u64(seed as u64);
+	let mut image = Image::new(width, height, Color::from_luminance(0.5));
+	for y in 0..height {
+		for x in 0..width {
+			let pixel = image.get_pixel_mut(x, y).unwrap();
+			let luminance = match _noise_type {
+				NoiseType::WhiteNoise => rng.gen_range(0.0..1.0) as f32,
+			};
+			*pixel = Color::from_luminance(luminance);
+		}
+	}
+	ImageFrame::<Color> {
+		image,
+		transform: DAffine2::from_scale(DVec2::new(width as f64, height as f64)),
+	}
+}
+
 #[cfg(test)]
 mod test {
 
