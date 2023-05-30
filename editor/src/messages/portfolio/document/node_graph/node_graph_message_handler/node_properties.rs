@@ -721,17 +721,39 @@ pub fn extract_channel_properties(document_node: &DocumentNode, node_id: NodeId,
 	vec![color_channel]
 }
 
+// Noise Type is commented out for now as ther is only one type of noise (White Noise). 
+// As soon as there are more types of noise, this should be uncommented.
 pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
-	let noise_type = noise_type(document_node, node_id, 0, "Noise Type", true);
+	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
-	let seed = number_widget(document_node, node_id, 3, "Seed", NumberInput::default().min(0.), true);
+	let noise_type = noise_type(document_node, node_id, 3, "Noise Type", true);
 
 	vec![
-		noise_type,
+		LayoutGroup::Row { widgets: seed },
 		LayoutGroup::Row { widgets: width },
 		LayoutGroup::Row { widgets: height },
+		//noise_type
+	]
+}
+
+pub fn perlin_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
+	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
+	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
+	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
+	let frequency = number_widget(document_node, node_id, 3, "Frequency", NumberInput::default().min(0.), true);
+	let octaves = number_widget(document_node, node_id, 4, "Octaves", NumberInput::default().min(1.), true);
+	let lacunarity = number_widget(document_node, node_id, 5, "Lacunarity", NumberInput::default().min(0.), true);
+	let tiling = bool_widget(document_node, node_id, 6, "Allow Tiling", true);
+
+	vec![
 		LayoutGroup::Row { widgets: seed },
+		LayoutGroup::Row { widgets: width },
+		LayoutGroup::Row { widgets: height },
+		LayoutGroup::Row { widgets: frequency },
+		LayoutGroup::Row { widgets: octaves },
+		LayoutGroup::Row { widgets: lacunarity },
+		LayoutGroup::Row { widgets: tiling },
 	]
 }
 
@@ -742,9 +764,9 @@ pub fn simplex_noise_properties(document_node: &DocumentNode, node_id: NodeId, _
 	let tiling = bool_widget(document_node, node_id, 3, "Allow Tiling", true);
 
 	vec![
+		LayoutGroup::Row { widgets: seed },
 		LayoutGroup::Row { widgets: width },
 		LayoutGroup::Row { widgets: height },
-		LayoutGroup::Row { widgets: seed },
 		LayoutGroup::Row { widgets: tiling },
 	]
 }
@@ -754,36 +776,16 @@ pub fn voronoi_noise_properties(document_node: &DocumentNode, node_id: NodeId, _
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
 	let frequency = number_widget(document_node, node_id, 3, "Frequency", NumberInput::default().min(0.), true);
-	let use_distance_fn = bool_widget(document_node, node_id, 4, "Use distance function", true);
-    let distance_function = voronoi_distance_function(document_node, node_id, 5, "Distance Function", true);
+    let distance_function = voronoi_distance_function(document_node, node_id, 4, "Distance Function", true);
+	let use_distance_fn = bool_widget(document_node, node_id, 5, "Use Cell Values", true);
 
 	vec![
 		LayoutGroup::Row { widgets: seed },
 		LayoutGroup::Row { widgets: width },
 		LayoutGroup::Row { widgets: height },
 		LayoutGroup::Row { widgets: frequency },
-		LayoutGroup::Row { widgets: use_distance_fn },
         distance_function,
-	]
-}
-
-pub fn perlin_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
-	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
-	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
-	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
-	let octaves = number_widget(document_node, node_id, 3, "Octaves", NumberInput::default().min(1.), true);
-	let frequency = number_widget(document_node, node_id, 4, "Frequency", NumberInput::default().min(0.), true);
-	let lacunarity = number_widget(document_node, node_id, 5, "Lacunarity", NumberInput::default().min(0.), true);
-	let tiling = bool_widget(document_node, node_id, 6, "Allow Tiling", true);
-
-	vec![
-		LayoutGroup::Row { widgets: width },
-		LayoutGroup::Row { widgets: height },
-		LayoutGroup::Row { widgets: seed },
-		LayoutGroup::Row { widgets: octaves },
-		LayoutGroup::Row { widgets: frequency },
-		LayoutGroup::Row { widgets: lacunarity },
-		LayoutGroup::Row { widgets: tiling },
+		LayoutGroup::Row { widgets: use_distance_fn },
 	]
 }
 

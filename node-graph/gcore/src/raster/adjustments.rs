@@ -573,7 +573,7 @@ impl core::fmt::Display for DistanceFunction {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		match self {
             DistanceFunction::Euclidean => write!(f, "Euclidean"),
-            DistanceFunction::EuclideanSquared => write!(f, "EuclideanSquared"),
+            DistanceFunction::EuclideanSquared => write!(f, "Euclidean Squared"),
             DistanceFunction::Manhattan => write!(f, "Manhattan"),
             DistanceFunction::Chebyshev => write!(f, "Chebyshev"),
             DistanceFunction::Quadratic => write!(f, "Quadratic"),

@@ -405,20 +405,20 @@ fn image_frame<_P: Pixel>(image: Image<_P>, transform: DAffine2) -> graphene_cor
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PixelNoiseNode<Width, Height, Seed> {
+pub struct PixelNoiseNode<Width, Height, NoiseType> {
 	width: Width,
 	height: Height,
-	seed: Seed,
+	noise_type: NoiseType,
 }
 
 #[node_macro::node_fn(PixelNoiseNode)]
-fn pixel_noise(_noise_type: NoiseType, width: u32, height: u32, seed: u32) -> graphene_core::raster::ImageFrame<Color> {
+fn pixel_noise(seed: u32, width: u32, height: u32, noise_type: NoiseType) -> graphene_core::raster::ImageFrame<Color> {
 	let mut rng = ChaCha8Rng::seed_from_u64(seed as u64);
 	let mut image = Image::new(width, height, Color::from_luminance(0.5));
 	for y in 0..height {
 		for x in 0..width {
 			let pixel = image.get_pixel_mut(x, y).unwrap();
-			let luminance = match _noise_type {
+			let luminance = match noise_type {
 				NoiseType::WhiteNoise => rng.gen_range(0.0..1.0) as f32,
 			};
 			*pixel = Color::from_luminance(luminance);
@@ -431,17 +431,17 @@ fn pixel_noise(_noise_type: NoiseType, width: u32, height: u32, seed: u32) -> gr
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PerlinNoiseNode<Width, Height, Octaves, Frequency, Lacunarity, Tiling> {
+pub struct PerlinNoiseNode<Width, Height, Frequency, Octaves, Lacunarity, Tiling> {
 	width: Width,
 	height: Height,
-	octaves: Octaves,
 	frequency: Frequency,
+	octaves: Octaves,
 	lacunarity: Lacunarity,
 	tiling: Tiling,
 }
 
 #[node_macro::node_fn(PerlinNoiseNode)]
-fn perlin_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
+fn perlin_noise(seed: u32, width: u32, height: u32, frequency: f32, octaves: u32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let fbm = Fbm::<Perlin>::new(seed).set_octaves(octaves as usize).set_frequency(frequency as f64).set_lacunarity(lacunarity as f64);
 
@@ -491,20 +491,20 @@ fn simplex_noise(seed: u32, width: u32, height: u32, tiling: bool) -> graphene_c
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct VoronoiNoiseNode<Width, Height, Frequency, UseDistanceFn, DistanceFunction> {
+pub struct VoronoiNoiseNode<Width, Height, Frequency, DistanceFunction, UseCellValue> {
 	width: Width,
 	height: Height,
 	frequency: Frequency,
-    use_distance_fn: UseDistanceFn,
     distance_function: DistanceFunction,
+    use_cell_value: UseCellValue,
 }
 
 #[node_macro::node_fn(VoronoiNoiseNode)]
-fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, use_distance_fn: bool, distance_function: DistanceFunction) -> graphene_core::raster::ImageFrame<Color> {
+fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, distance_function: DistanceFunction, use_cell_value: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let noise_fn = Worley::new(seed)
 		.set_frequency(frequency as f64)
-        .set_return_type(if use_distance_fn { ReturnType::Distance } else { ReturnType::Value })
+        .set_return_type(if !use_cell_value { ReturnType::Distance } else { ReturnType::Value })
         .set_distance_function(match distance_function {
             DistanceFunction::Euclidean => distance_functions::euclidean,
             DistanceFunction::EuclideanSquared => distance_functions::euclidean_squared,
