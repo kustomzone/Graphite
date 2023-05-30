@@ -720,6 +720,26 @@ pub fn noise_properties(document_node: &DocumentNode, node_id: NodeId, _context:
 	vec![LayoutGroup::Row { widgets: width }, LayoutGroup::Row { widgets: height }, LayoutGroup::Row { widgets: seed }]
 }
 
+pub fn perlin_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
+	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
+	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
+	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
+	let octaves = number_widget(document_node, node_id, 3, "Octaves", NumberInput::default().min(1.), true);
+	let frequency = number_widget(document_node, node_id, 4, "Frequency", NumberInput::default().min(0.), true);
+	let lacunarity = number_widget(document_node, node_id, 5, "Lacunarity", NumberInput::default().min(0.), true);
+	let tiling = bool_widget(document_node, node_id, 6, "Allow Tiling", true);
+
+	vec![
+		LayoutGroup::Row { widgets: width },
+		LayoutGroup::Row { widgets: height },
+		LayoutGroup::Row { widgets: seed },
+		LayoutGroup::Row { widgets: octaves },
+		LayoutGroup::Row { widgets: frequency },
+		LayoutGroup::Row { widgets: lacunarity },
+		LayoutGroup::Row { widgets: tiling },
+	]
+}
+
 pub fn adjust_hsl_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
 	let hue_shift = number_widget(document_node, node_id, 1, "Hue Shift", NumberInput::default().min(-180.).max(180.).unit("°"), true);
 	let saturation_shift = number_widget(document_node, node_id, 2, "Saturation Shift", NumberInput::default().min(-100.).max(100.).unit("%"), true);

@@ -423,8 +423,8 @@ fn node_registry() -> HashMap<NodeIdentifier, HashMap<NodeIOTypes, NodeConstruct
 		register_node!(graphene_core::structural::ConsNode<_, _>, input: Image<Color>, params: [&str]),
 		register_node!(graphene_std::raster::ImageFrameNode<_, _>, input: Image<Color>, params: [DAffine2]),
 		register_node!(graphene_std::raster::PixelNoiseNode<_, _, _>, input: NoiseType, params: [u32, u32, u32]),
-		register_node!(graphene_std::raster::PerlinNoiseNode<_, _>, input: u32, params: [u32, u32]),
-		register_node!(graphene_std::raster::SimplexNoiseNode<_, _>, input: u32, params: [u32, u32]),
+		register_node!(graphene_std::raster::PerlinNoiseNode<_, _, _, _, _, _>, input: u32, params: [u32, u32, u32, f32, f32, bool]),
+		register_node!(graphene_std::raster::SimplexNoiseNode<_, _, _, _, _, _>, input: u32, params: [u32, u32, u32, f32, f32, bool]),
 		register_node!(graphene_std::raster::VoronoiNoiseNode<_, _>, input: u32, params: [u32, u32]),
 		#[cfg(feature = "quantization")]
 		register_node!(graphene_std::quantization::GenerateQuantizationNode<_, _>, input: ImageFrame<Color>, params: [u32, u32]),

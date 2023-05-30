@@ -15,7 +15,9 @@ use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
 use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
+use noise::MultiFractal;
 use noise::{Fbm, Perlin, Simplex, Worley};
+use noise::permutationtable::PermutationTable;
 
 #[derive(Debug, DynAny)]
 pub enum Error {
@@ -427,17 +429,21 @@ fn pixel_noise(_noise_type: NoiseType, width: u32, height: u32, seed: u32) -> gr
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PerlinNoiseNode<Width, Height> {
+pub struct PerlinNoiseNode<Width, Height, Octaves, Frequency, Lacunarity, Tiling> {
 	width: Width,
 	height: Height,
+	octaves: Octaves,
+	frequency: Frequency,
+	lacunarity: Lacunarity,
+	tiling: Tiling,
 }
 
 #[node_macro::node_fn(PerlinNoiseNode)]
-fn perlin_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
+fn perlin_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
-	let fbm = Fbm::<Perlin>::new(seed);
+	let fbm = Fbm::<Perlin>::new(seed).set_octaves(octaves as usize).set_frequency(frequency as f64).set_lacunarity(lacunarity as f64);
 
-	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
+	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
 
 	for y in 0..height {
 		for x in 0..width {
@@ -453,17 +459,26 @@ fn perlin_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::Im
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SimplexNoiseNode<Width, Height> {
+pub struct SimplexNoiseNode<Width, Height, Octaves, Frequency, Lacunarity, Tiling> {
 	width: Width,
 	height: Height,
+	octaves: Octaves,
+	frequency: Frequency,
+	lacunarity: Lacunarity,
+	tiling: Tiling,
 }
 
 #[node_macro::node_fn(SimplexNoiseNode)]
-fn simplex_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
+fn simplex_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
-	let fbm = Fbm::<Simplex>::new(seed);
+	//let fbm = Fbm::<Simplex>::new(seed)
+	//	.set_octaves(octaves as usize)
+	//	.set_frequency(frequency as f64)
+	//	.set_lacunarity(lacunarity as f64);
 
-	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
+	//let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
+    let hasher = PermutationTable::new(seed);
+    let luma_map = PlaneMapBuilder::new_fn(|point| simplex_2d(point.into(), &hasher).0).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
 
 	for y in 0..height {
 		for x in 0..width {
