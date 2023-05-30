@@ -558,6 +558,42 @@ impl NoiseType {
 	}
 }
 
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "std", derive(specta::Type))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DynAny)]
+pub enum DistanceFunction {
+	Euclidean,
+    EuclideanSquared,
+    Manhattan,
+    Chebyshev,
+    Quadratic,
+}
+
+impl core::fmt::Display for DistanceFunction {
+	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+		match self {
+            DistanceFunction::Euclidean => write!(f, "Euclidean"),
+            DistanceFunction::EuclideanSquared => write!(f, "EuclideanSquared"),
+            DistanceFunction::Manhattan => write!(f, "Manhattan"),
+            DistanceFunction::Chebyshev => write!(f, "Chebyshev"),
+            DistanceFunction::Quadratic => write!(f, "Quadratic"),
+		}
+	}
+}
+
+impl DistanceFunction {
+	pub fn list() -> [DistanceFunction; 5] {
+        [
+            DistanceFunction::Euclidean,
+            DistanceFunction::EuclideanSquared,
+            DistanceFunction::Manhattan,
+            DistanceFunction::Chebyshev,
+            DistanceFunction::Quadratic,
+        ]
+	}
+}
+
+
 #[derive(Debug, Clone, Copy)]
 pub struct ChannelMixerNode<Monochrome, MonochromeR, MonochromeG, MonochromeB, MonochromeC, RedR, RedG, RedB, RedC, GreenR, GreenG, GreenB, GreenC, BlueR, BlueG, BlueB, BlueC> {
 	monochrome: Monochrome,

@@ -6,7 +6,7 @@ use crate::messages::prelude::*;
 use graph_craft::concrete;
 use graph_craft::document::value::TaggedValue;
 use graph_craft::document::{DocumentNode, NodeId, NodeInput};
-use graphene_core::raster::{BlendMode, Color, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
+use graphene_core::raster::{BlendMode, Color, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice, DistanceFunction};
 use graphene_core::text::Font;
 use graphene_core::vector::style::{FillType, GradientType, LineCap, LineJoin};
 use graphene_core::{Cow, Type, TypeDescriptor};
@@ -322,6 +322,29 @@ fn noise_type(document_node: &DocumentNode, node_id: u64, index: usize, name: &s
 		]);
 	}
 	LayoutGroup::Row { widgets }.with_tooltip("Type of Noise")
+}
+//
+//TODO Use generalized Version of this as soon as it's available
+fn voronoi_distance_function(document_node: &DocumentNode, node_id: u64, index: usize, name: &str, blank_assist: bool) -> LayoutGroup {
+	let mut widgets = start_widgets(document_node, node_id, index, name, FrontendGraphDataType::General, blank_assist);
+	if let &NodeInput::Value {
+		tagged_value: TaggedValue::DistanceFunction(calculation),
+		exposed: false,
+	} = &document_node.inputs[index]
+	{
+		let calculation_modes = DistanceFunction::list();
+		let mut entries = Vec::with_capacity(calculation_modes.len());
+		for method in calculation_modes {
+			entries.push(DropdownEntryData::new(method.to_string()).on_update(update_value(move |_| TaggedValue::DistanceFunction(method), node_id, index)));
+		}
+		let entries = vec![entries];
+
+		widgets.extend_from_slice(&[
+			WidgetHolder::unrelated_separator(),
+			DropdownInput::new(entries).selected_index(Some(calculation as u32)).widget_holder(),
+		]);
+	}
+	LayoutGroup::Row { widgets }.with_tooltip("Distance Function")
 }
 
 //TODO Use generalized Version of this as soon as it's available
@@ -731,16 +754,16 @@ pub fn voronoi_noise_properties(document_node: &DocumentNode, node_id: NodeId, _
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
 	let frequency = number_widget(document_node, node_id, 3, "Frequency", NumberInput::default().min(0.), true);
-	let tiling = bool_widget(document_node, node_id, 4, "Allow Tiling", true);
-	let use_distance = bool_widget(document_node, node_id, 5, "Use Distance", true);
+	let use_distance_fn = bool_widget(document_node, node_id, 4, "Use distance function", true);
+    let distance_function = voronoi_distance_function(document_node, node_id, 5, "Distance Function", true);
 
 	vec![
 		LayoutGroup::Row { widgets: seed },
 		LayoutGroup::Row { widgets: width },
 		LayoutGroup::Row { widgets: height },
 		LayoutGroup::Row { widgets: frequency },
-		LayoutGroup::Row { widgets: tiling },
-		LayoutGroup::Row { widgets: use_distance },
+		LayoutGroup::Row { widgets: use_distance_fn },
+        distance_function,
 	]
 }
 

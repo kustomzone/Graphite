@@ -8,7 +8,7 @@ use graph_craft::document::value::*;
 use graph_craft::document::*;
 use graph_craft::imaginate_input::ImaginateSamplingMethod;
 use graph_craft::NodeIdentifier;
-use graphene_core::raster::{BlendMode, Color, Image, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
+use graphene_core::raster::{BlendMode, Color, Image, ImageFrame, LuminanceCalculation, NoiseType, DistanceFunction, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
 use graphene_core::text::Font;
 use graphene_core::vector::VectorData;
 use graphene_core::*;
@@ -485,8 +485,8 @@ fn static_nodes() -> Vec<DocumentNodeType> {
 				DocumentInputType::value("Width", TaggedValue::U32(100), false),
 				DocumentInputType::value("Height", TaggedValue::U32(100), false),
 				DocumentInputType::value("Frequency", TaggedValue::F32(1.), false),
-				DocumentInputType::value("Enable Tiling", TaggedValue::Bool(false), false),
-				DocumentInputType::value("Use Distance", TaggedValue::Bool(false), false),
+				DocumentInputType::value("Use distance function", TaggedValue::Bool(false), false),
+				DocumentInputType::value("Distance Function", TaggedValue::DistanceFunction(DistanceFunction::Euclidean), false),
 			],
 			outputs: vec![DocumentOutputType::new("Image", FrontendGraphDataType::Raster)],
 			properties: node_properties::voronoi_noise_properties,

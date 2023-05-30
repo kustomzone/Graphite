@@ -1,12 +1,12 @@
 use dyn_any::{DynAny, StaticType};
 use glam::{DAffine2, DVec2};
-use graphene_core::raster::{Alpha, BlendMode, BlendNode, Image, ImageFrame, Linear, LinearChannel, Luminance, NoiseType, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample};
+use graphene_core::raster::{Alpha, BlendMode, BlendNode, Image, ImageFrame, Linear, LinearChannel, Luminance, NoiseType, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample, DistanceFunction};
 use graphene_core::transform::Transform;
 
 use graphene_core::raster::bbox::{AxisAlignedBbox, Bbox};
 use graphene_core::value::CopiedNode;
 use graphene_core::{Color, Node};
-use noise::core::worley::ReturnType;
+use noise::core::worley::{ReturnType, distance_functions};
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -491,22 +491,29 @@ fn simplex_noise(seed: u32, width: u32, height: u32, tiling: bool) -> graphene_c
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct VoronoiNoiseNode<Width, Height, Frequency, Tiling, UseDistance> {
+pub struct VoronoiNoiseNode<Width, Height, Frequency, UseDistanceFn, DistanceFunction> {
 	width: Width,
 	height: Height,
 	frequency: Frequency,
-	tiling: Tiling,
-	use_distance: UseDistance,
+    use_distance_fn: UseDistanceFn,
+    distance_function: DistanceFunction,
 }
 
 #[node_macro::node_fn(VoronoiNoiseNode)]
-fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, tiling: bool, use_distance: bool) -> graphene_core::raster::ImageFrame<Color> {
+fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, use_distance_fn: bool, distance_function: DistanceFunction) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let noise_fn = Worley::new(seed)
 		.set_frequency(frequency as f64)
-		.set_return_type(if use_distance { ReturnType::Distance } else { ReturnType::Value });
+        .set_return_type(if use_distance_fn { ReturnType::Distance } else { ReturnType::Value })
+        .set_distance_function(match distance_function {
+            DistanceFunction::Euclidean => distance_functions::euclidean,
+            DistanceFunction::EuclideanSquared => distance_functions::euclidean_squared,
+            DistanceFunction::Manhattan => distance_functions::manhattan,
+            DistanceFunction::Chebyshev => distance_functions::chebyshev,
+            DistanceFunction::Quadratic => distance_functions::quadratic,
+        });
 
-	let luma_map = PlaneMapBuilder::<_, 2>::new(noise_fn).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
+	let luma_map = PlaneMapBuilder::<_, 2>::new(noise_fn).set_size(width as usize, height as usize).build();
 
 	for y in 0..height {
 		for x in 0..width {
