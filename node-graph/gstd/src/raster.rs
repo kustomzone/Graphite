@@ -510,7 +510,6 @@ fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, distance_fu
             DistanceFunction::EuclideanSquared => distance_functions::euclidean_squared,
             DistanceFunction::Manhattan => distance_functions::manhattan,
             DistanceFunction::Chebyshev => distance_functions::chebyshev,
-            DistanceFunction::Quadratic => distance_functions::quadratic,
         });
 
 	let luma_map = PlaneMapBuilder::<_, 2>::new(noise_fn).set_size(width as usize, height as usize).build();

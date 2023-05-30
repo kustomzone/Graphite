@@ -566,7 +566,6 @@ pub enum DistanceFunction {
     EuclideanSquared,
     Manhattan,
     Chebyshev,
-    Quadratic,
 }
 
 impl core::fmt::Display for DistanceFunction {
@@ -576,19 +575,17 @@ impl core::fmt::Display for DistanceFunction {
             DistanceFunction::EuclideanSquared => write!(f, "Euclidean Squared"),
             DistanceFunction::Manhattan => write!(f, "Manhattan"),
             DistanceFunction::Chebyshev => write!(f, "Chebyshev"),
-            DistanceFunction::Quadratic => write!(f, "Quadratic"),
 		}
 	}
 }
 
 impl DistanceFunction {
-	pub fn list() -> [DistanceFunction; 5] {
+	pub fn list() -> [DistanceFunction; 4] {
         [
             DistanceFunction::Euclidean,
             DistanceFunction::EuclideanSquared,
             DistanceFunction::Manhattan,
             DistanceFunction::Chebyshev,
-            DistanceFunction::Quadratic,
         ]
 	}
 }
