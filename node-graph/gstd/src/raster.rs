@@ -19,7 +19,7 @@ use noise::core::simplex::simplex_2d;
 use noise::permutationtable::PermutationTable;
 use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
 use noise::MultiFractal;
-use noise::{Fbm, Perlin, Simplex, Worley};
+use noise::{Fbm, Perlin, Worley};
 
 #[derive(Debug, DynAny)]
 pub enum Error {
