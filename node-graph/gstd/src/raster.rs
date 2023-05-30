@@ -6,6 +6,7 @@ use graphene_core::transform::Transform;
 use graphene_core::raster::bbox::{AxisAlignedBbox, Bbox};
 use graphene_core::value::CopiedNode;
 use graphene_core::{Color, Node};
+use noise::core::worley::ReturnType;
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -14,10 +15,11 @@ use std::path::Path;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
+use noise::core::simplex::simplex_2d;
+use noise::permutationtable::PermutationTable;
 use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
 use noise::MultiFractal;
 use noise::{Fbm, Perlin, Simplex, Worley};
-use noise::permutationtable::PermutationTable;
 
 #[derive(Debug, DynAny)]
 pub enum Error {
@@ -459,26 +461,21 @@ fn perlin_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f32
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SimplexNoiseNode<Width, Height, Octaves, Frequency, Lacunarity, Tiling> {
+pub struct SimplexNoiseNode<Width, Height, Tiling> {
 	width: Width,
 	height: Height,
-	octaves: Octaves,
-	frequency: Frequency,
-	lacunarity: Lacunarity,
 	tiling: Tiling,
 }
 
 #[node_macro::node_fn(SimplexNoiseNode)]
-fn simplex_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
+fn simplex_noise(seed: u32, width: u32, height: u32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
-	//let fbm = Fbm::<Simplex>::new(seed)
-	//	.set_octaves(octaves as usize)
-	//	.set_frequency(frequency as f64)
-	//	.set_lacunarity(lacunarity as f64);
 
-	//let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
-    let hasher = PermutationTable::new(seed);
-    let luma_map = PlaneMapBuilder::new_fn(|point| simplex_2d(point.into(), &hasher).0).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
+	let hasher = PermutationTable::new(seed);
+	let luma_map = PlaneMapBuilder::new_fn(|point, nh| simplex_2d(point.into(), nh).0, &hasher)
+		.set_size(width as usize, height as usize)
+		.set_is_seamless(tiling)
+		.build();
 
 	for y in 0..height {
 		for x in 0..width {
@@ -494,17 +491,22 @@ fn simplex_noise(seed: u32, width: u32, height: u32, octaves: u32, frequency: f3
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct VoronoiNoiseNode<Width, Height> {
+pub struct VoronoiNoiseNode<Width, Height, Frequency, Tiling, UseDistance> {
 	width: Width,
 	height: Height,
+	frequency: Frequency,
+	tiling: Tiling,
+	use_distance: UseDistance,
 }
 
 #[node_macro::node_fn(VoronoiNoiseNode)]
-fn voronoi_noise(seed: u32, width: u32, height: u32) -> graphene_core::raster::ImageFrame<Color> {
+fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, tiling: bool, use_distance: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
-	let fbm = Fbm::<Worley>::new(seed);
+	let noise_fn = Worley::new(seed)
+		.set_frequency(frequency as f64)
+		.set_return_type(if use_distance { ReturnType::Distance } else { ReturnType::Value });
 
-	let luma_map = PlaneMapBuilder::<_, 2>::new(&fbm).set_size(width as usize, height as usize).build();
+	let luma_map = PlaneMapBuilder::<_, 2>::new(noise_fn).set_size(width as usize, height as usize).set_is_seamless(tiling).build();
 
 	for y in 0..height {
 		for x in 0..width {
