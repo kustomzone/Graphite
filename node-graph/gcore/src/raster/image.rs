@@ -1,3 +1,4 @@
+use super::discrete_srgb::float_to_srgb_u8;
 use super::{Color, ImageSlice};
 use crate::Node;
 use alloc::vec::Vec;
@@ -135,27 +136,57 @@ use super::*;
 impl<P: Alpha + RGB + AssociatedAlpha> Image<P>
 where
 	P::ColorChannel: Linear,
+	<P as Alpha>::AlphaChannel: Linear,
 {
 	/// Flattens each channel cast to a u8
 	pub fn into_flat_u8(self) -> (Vec<u8>, u32, u32) {
 		let Image { width, height, data } = self;
+		assert!(data.len() == width as usize * height as usize);
 
-		let to_gamma = SRGBGammaFloat::from_linear;
-		let to_u8 = |x| (num_cast::<_, f32>(x).unwrap() * 255.) as u8;
+		// Cache the last sRGB value we computed, speeds up fills.
+		let mut last_r = 0.;
+		let mut last_r_srgb = 0u8;
+		let mut last_g = 0.;
+		let mut last_g_srgb = 0u8;
+		let mut last_b = 0.;
+		let mut last_b_srgb = 0u8;
 
-		let result_bytes = data
-			.into_iter()
-			.flat_map(|color| {
-				[
-					to_u8(to_gamma(color.r() / color.a().to_channel())),
-					to_u8(to_gamma(color.g() / color.a().to_channel())),
-					to_u8(to_gamma(color.b() / color.a().to_channel())),
-					(num_cast::<_, f32>(color.a()).unwrap() * 255.) as u8,
-				]
-			})
-			.collect();
+		let mut result = vec![0; data.len() * 4];
+		let mut i = 0;
+		for color in data {
+			let a = color.a().to_f32();
+			// Smaller alpha values than this would map to fully transparent
+			// anyway, avoid expensive encoding.
+			if a >= 0.5 / 255. {
+				let undo_premultiply = 1. / a;
+				let r = color.r().to_f32() * undo_premultiply;
+				let g = color.g().to_f32() * undo_premultiply;
+				let b = color.b().to_f32() * undo_premultiply;
 
-		(result_bytes, width, height)
+				// Compute new sRGB value if necessary.
+				if r != last_r {
+					last_r = r;
+					last_r_srgb = float_to_srgb_u8(r);
+				}
+				if g != last_g {
+					last_g = g;
+					last_g_srgb = float_to_srgb_u8(g);
+				}
+				if b != last_b {
+					last_b = b;
+					last_b_srgb = float_to_srgb_u8(b);
+				}
+
+				result[i] = last_r_srgb;
+				result[i + 1] = last_g_srgb;
+				result[i + 2] = last_b_srgb;
+				result[i + 3] = (a * 255. + 0.5) as u8;
+			}
+
+			i += 4;
+		}
+
+		(result, width, height)
 	}
 }
 
@@ -320,12 +351,13 @@ impl<'a> AsRef<EditorApi<'a>> for EditorApi<'a> {
 	}
 }
 
+#[derive(Debug, Clone, Copy, Default)]
 pub struct ExtractImageFrame;
 
-impl<'a: 'input, 'input> Node<'input, EditorApi<'a>> for ExtractImageFrame {
+impl<'a: 'input, 'input> Node<'input, &'a EditorApi<'a>> for ExtractImageFrame {
 	type Output = ImageFrame<Color>;
-	fn eval(&'input self, mut editor_api: EditorApi<'a>) -> Self::Output {
-		editor_api.image_frame.take().unwrap_or(ImageFrame::identity())
+	fn eval(&'input self, editor_api: &'a EditorApi<'a>) -> Self::Output {
+		editor_api.image_frame.clone().unwrap_or(ImageFrame::identity())
 	}
 }
 
