@@ -1,12 +1,12 @@
 use dyn_any::{DynAny, StaticType};
 use glam::{DAffine2, DVec2};
-use graphene_core::raster::{Alpha, BlendMode, BlendNode, Image, ImageFrame, Linear, LinearChannel, Luminance, NoiseType, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample, DistanceFunction};
+use graphene_core::raster::{Alpha, BlendMode, BlendNode, DistanceFunction, Image, ImageFrame, Linear, LinearChannel, Luminance, NoiseType, Pixel, RGBMut, Raster, RasterMut, RedGreenBlue, Sample};
 use graphene_core::transform::Transform;
 
 use graphene_core::raster::bbox::{AxisAlignedBbox, Bbox};
 use graphene_core::value::CopiedNode;
 use graphene_core::{Color, Node};
-use noise::core::worley::{ReturnType, distance_functions};
+use noise::core::worley::{distance_functions, ReturnType};
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -17,7 +17,7 @@ use rand_chacha::ChaCha8Rng;
 
 use noise::core::simplex::simplex_2d;
 use noise::permutationtable::PermutationTable;
-use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
+use noise::utils::*;
 use noise::MultiFractal;
 use noise::{Fbm, Perlin, Worley};
 
@@ -472,6 +472,12 @@ fn simplex_noise(seed: u32, width: u32, height: u32, tiling: bool) -> graphene_c
 	let mut image = Image::new(width, height, Color::BLACK);
 
 	let hasher = PermutationTable::new(seed);
+	//let luma_map = PlaneMapBuilder::new_fn(|point| simplex_2d(point.into(), &hasher).0)
+	//        .set_size(1024, 1024)
+	//        .set_x_bounds(-5.0, 5.0)
+	//        .set_y_bounds(-5.0, 5.0)
+	//        .build();
+
 	let luma_map = PlaneMapBuilder::new_fn(|point, nh| simplex_2d(point.into(), nh).0, &hasher)
 		.set_size(width as usize, height as usize)
 		.set_is_seamless(tiling)
@@ -495,8 +501,8 @@ pub struct VoronoiNoiseNode<Width, Height, Frequency, DistanceFunction, UseCellV
 	width: Width,
 	height: Height,
 	frequency: Frequency,
-    distance_function: DistanceFunction,
-    use_cell_value: UseCellValue,
+	distance_function: DistanceFunction,
+	use_cell_value: UseCellValue,
 }
 
 #[node_macro::node_fn(VoronoiNoiseNode)]
@@ -504,13 +510,13 @@ fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, distance_fu
 	let mut image = Image::new(width, height, Color::BLACK);
 	let noise_fn = Worley::new(seed)
 		.set_frequency(frequency as f64)
-        .set_return_type(if !use_cell_value { ReturnType::Distance } else { ReturnType::Value })
-        .set_distance_function(match distance_function {
-            DistanceFunction::Euclidean => distance_functions::euclidean,
-            DistanceFunction::EuclideanSquared => distance_functions::euclidean_squared,
-            DistanceFunction::Manhattan => distance_functions::manhattan,
-            DistanceFunction::Chebyshev => distance_functions::chebyshev,
-        });
+		.set_return_type(if !use_cell_value { ReturnType::Distance } else { ReturnType::Value })
+		.set_distance_function(match distance_function {
+			DistanceFunction::Euclidean => distance_functions::euclidean,
+			DistanceFunction::EuclideanSquared => distance_functions::euclidean_squared,
+			DistanceFunction::Manhattan => distance_functions::manhattan,
+			DistanceFunction::Chebyshev => distance_functions::chebyshev,
+		});
 
 	let luma_map = PlaneMapBuilder::<_, 2>::new(noise_fn).set_size(width as usize, height as usize).build();
 

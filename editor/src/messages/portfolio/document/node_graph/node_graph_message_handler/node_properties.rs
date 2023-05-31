@@ -6,7 +6,7 @@ use crate::messages::prelude::*;
 use graph_craft::concrete;
 use graph_craft::document::value::TaggedValue;
 use graph_craft::document::{DocumentNode, NodeId, NodeInput};
-use graphene_core::raster::{BlendMode, Color, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice, DistanceFunction};
+use graphene_core::raster::{BlendMode, Color, DistanceFunction, ImageFrame, LuminanceCalculation, NoiseType, RedGreenBlue, RelativeAbsolute, SelectiveColorChoice};
 use graphene_core::text::Font;
 use graphene_core::vector::style::{FillType, GradientType, LineCap, LineJoin};
 use graphene_core::{Cow, Type, TypeDescriptor};
@@ -721,7 +721,7 @@ pub fn extract_channel_properties(document_node: &DocumentNode, node_id: NodeId,
 	vec![color_channel]
 }
 
-// Noise Type is commented out for now as ther is only one type of noise (White Noise). 
+// Noise Type is commented out for now as ther is only one type of noise (White Noise).
 // As soon as there are more types of noise, this should be uncommented.
 pub fn pixel_noise_properties(document_node: &DocumentNode, node_id: NodeId, _context: &mut NodePropertiesContext) -> Vec<LayoutGroup> {
 	let seed = number_widget(document_node, node_id, 0, "Seed", NumberInput::default().min(0.), true);
@@ -776,7 +776,7 @@ pub fn voronoi_noise_properties(document_node: &DocumentNode, node_id: NodeId, _
 	let width = number_widget(document_node, node_id, 1, "Width", NumberInput::default().unit("px").min(1.), true);
 	let height = number_widget(document_node, node_id, 2, "Height", NumberInput::default().unit("px").min(1.), true);
 	let frequency = number_widget(document_node, node_id, 3, "Frequency", NumberInput::default().min(0.), true);
-    let distance_function = voronoi_distance_function(document_node, node_id, 4, "Distance Function", true);
+	let distance_function = voronoi_distance_function(document_node, node_id, 4, "Distance Function", true);
 	let use_distance_fn = bool_widget(document_node, node_id, 5, "Use Cell Values", true);
 
 	vec![
@@ -784,7 +784,7 @@ pub fn voronoi_noise_properties(document_node: &DocumentNode, node_id: NodeId, _
 		LayoutGroup::Row { widgets: width },
 		LayoutGroup::Row { widgets: height },
 		LayoutGroup::Row { widgets: frequency },
-        distance_function,
+		distance_function,
 		LayoutGroup::Row { widgets: use_distance_fn },
 	]
 }

@@ -2733,8 +2733,7 @@ checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
 [[package]]
 name = "noise"
 version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ba869e17168793186c10ca82c7079a4ffdeac4f1a7d9e755b9491c028180e40"
+source = "git+https://github.com/GraphiteEditor/noise-rs.git?branch=main#2bb40839f7aa19114b01d19707b9c96d19717b0d"
 dependencies = [
  "num-traits",
  "rand 0.7.3",

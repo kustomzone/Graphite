@@ -563,33 +563,32 @@ impl NoiseType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DynAny)]
 pub enum DistanceFunction {
 	Euclidean,
-    EuclideanSquared,
-    Manhattan,
-    Chebyshev,
+	EuclideanSquared,
+	Manhattan,
+	Chebyshev,
 }
 
 impl core::fmt::Display for DistanceFunction {
 	fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
 		match self {
-            DistanceFunction::Euclidean => write!(f, "Euclidean"),
-            DistanceFunction::EuclideanSquared => write!(f, "Euclidean Squared"),
-            DistanceFunction::Manhattan => write!(f, "Manhattan"),
-            DistanceFunction::Chebyshev => write!(f, "Chebyshev"),
+			DistanceFunction::Euclidean => write!(f, "Euclidean"),
+			DistanceFunction::EuclideanSquared => write!(f, "Euclidean Squared"),
+			DistanceFunction::Manhattan => write!(f, "Manhattan"),
+			DistanceFunction::Chebyshev => write!(f, "Chebyshev"),
 		}
 	}
 }
 
 impl DistanceFunction {
 	pub fn list() -> [DistanceFunction; 4] {
-        [
-            DistanceFunction::Euclidean,
-            DistanceFunction::EuclideanSquared,
-            DistanceFunction::Manhattan,
-            DistanceFunction::Chebyshev,
-        ]
+		[
+			DistanceFunction::Euclidean,
+			DistanceFunction::EuclideanSquared,
+			DistanceFunction::Manhattan,
+			DistanceFunction::Chebyshev,
+		]
 	}
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct ChannelMixerNode<Monochrome, MonochromeR, MonochromeG, MonochromeB, MonochromeC, RedR, RedG, RedB, RedC, GreenR, GreenG, GreenB, GreenC, BlueR, BlueG, BlueB, BlueC> {
