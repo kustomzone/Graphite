@@ -405,14 +405,14 @@ fn image_frame<_P: Pixel>(image: Image<_P>, transform: DAffine2) -> graphene_cor
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PixelNoiseNode<Width, Height, NoiseType> {
-	width: Width,
+pub struct PixelNoiseNode<Height, Seed, NoiseType> {
 	height: Height,
+	seed: Seed,
 	noise_type: NoiseType,
 }
 
 #[node_macro::node_fn(PixelNoiseNode)]
-fn pixel_noise(seed: u32, width: u32, height: u32, noise_type: NoiseType) -> graphene_core::raster::ImageFrame<Color> {
+fn pixel_noise(width: u32, height: u32, seed: u32, noise_type: NoiseType) -> graphene_core::raster::ImageFrame<Color> {
 	let mut rng = ChaCha8Rng::seed_from_u64(seed as u64);
 	let mut image = Image::new(width, height, Color::from_luminance(0.5));
 	for y in 0..height {
@@ -431,9 +431,9 @@ fn pixel_noise(seed: u32, width: u32, height: u32, noise_type: NoiseType) -> gra
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PerlinNoiseNode<Width, Height, Frequency, Octaves, Lacunarity, Tiling> {
-	width: Width,
+pub struct PerlinNoiseNode<Height, Seed, Frequency, Octaves, Lacunarity, Tiling> {
 	height: Height,
+	seed: Seed,
 	frequency: Frequency,
 	octaves: Octaves,
 	lacunarity: Lacunarity,
@@ -441,7 +441,7 @@ pub struct PerlinNoiseNode<Width, Height, Frequency, Octaves, Lacunarity, Tiling
 }
 
 #[node_macro::node_fn(PerlinNoiseNode)]
-fn perlin_noise(seed: u32, width: u32, height: u32, frequency: f32, octaves: u32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
+fn perlin_noise(width: u32, height: u32, seed: u32, frequency: f32, octaves: u32, lacunarity: f32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let fbm = Fbm::<Perlin>::new(seed).set_octaves(octaves as usize).set_frequency(frequency as f64).set_lacunarity(lacunarity as f64);
 
@@ -461,52 +461,16 @@ fn perlin_noise(seed: u32, width: u32, height: u32, frequency: f32, octaves: u32
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SimplexNoiseNode<Width, Height, Tiling> {
-	width: Width,
+pub struct VoronoiNoiseNode<Height, Seed, Frequency, DistanceFunction, UseCellValue> {
 	height: Height,
-	tiling: Tiling,
-}
-
-#[node_macro::node_fn(SimplexNoiseNode)]
-fn simplex_noise(seed: u32, width: u32, height: u32, tiling: bool) -> graphene_core::raster::ImageFrame<Color> {
-	let mut image = Image::new(width, height, Color::BLACK);
-
-	let hasher = PermutationTable::new(seed);
-	//let luma_map = PlaneMapBuilder::new_fn(|point| simplex_2d(point.into(), &hasher).0)
-	//        .set_size(1024, 1024)
-	//        .set_x_bounds(-5.0, 5.0)
-	//        .set_y_bounds(-5.0, 5.0)
-	//        .build();
-
-	let luma_map = PlaneMapBuilder::new_fn(|point, nh| simplex_2d(point.into(), nh).0, &hasher)
-		.set_size(width as usize, height as usize)
-		.set_is_seamless(tiling)
-		.build();
-
-	for y in 0..height {
-		for x in 0..width {
-			let pixel = image.get_pixel_mut(x, y).unwrap();
-			let luminance: f64 = luma_map.get_value(x as usize, y as usize) / 2. + 0.5;
-			*pixel = Color::from_luminance(luminance as f32);
-		}
-	}
-	ImageFrame::<Color> {
-		image,
-		transform: DAffine2::from_scale(DVec2::new(width as f64, height as f64)),
-	}
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct VoronoiNoiseNode<Width, Height, Frequency, DistanceFunction, UseCellValue> {
-	width: Width,
-	height: Height,
+	seed: Seed,
 	frequency: Frequency,
 	distance_function: DistanceFunction,
 	use_cell_value: UseCellValue,
 }
 
 #[node_macro::node_fn(VoronoiNoiseNode)]
-fn voronoi_noise(seed: u32, width: u32, height: u32, frequency: f32, distance_function: DistanceFunction, use_cell_value: bool) -> graphene_core::raster::ImageFrame<Color> {
+fn voronoi_noise(width: u32, height: u32, seed: u32, frequency: f32, distance_function: DistanceFunction, use_cell_value: bool) -> graphene_core::raster::ImageFrame<Color> {
 	let mut image = Image::new(width, height, Color::BLACK);
 	let noise_fn = Worley::new(seed)
 		.set_frequency(frequency as f64)
